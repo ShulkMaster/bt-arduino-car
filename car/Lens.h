@@ -1,32 +1,34 @@
 typedef void (*LensCallback)(int front, int back);
 
-#define BAD_STATE -69
 #define WAIT_TIME 20
-#define PULSE_TIMEOUT 400000
+#define PULSE_TIMEOUT 10000
 
 enum LensState {
-  Idle,
-  LowPulse,
-  MeasuringF,
-  MeasuringB,
+  PulseF,
+  MeasureF,
+  PulseB,
+  MeasureB,
 };
 
 class Lens {
   private:
-  // trigger pin is shared
-  const byte  triggerPin;
+  const byte  triggerF;
   const byte echoFront;
+  const byte  triggerB;
   const byte echoBack;
   LensCallback cb = NULL;
   unsigned long lastTime = 0;
-  LensState state = Idle;
-  int temp = BAD_STATE;
+  LensState state = PulseF;
+  int temp = 0;
 
 public:
-  Lens(byte trig, byte echoF,byte echoB): triggerPin(trig), echoFront(echoF), echoBack(echoB) {
-    pinMode(trig, OUTPUT);
+  Lens(byte trigF, byte trigB, byte echoF,byte echoB): triggerF(trigF), triggerB(trigB), echoFront(echoF), echoBack(echoB) {
+    pinMode(trigF, OUTPUT);
+    pinMode(trigB, OUTPUT);
     pinMode(echoF, INPUT);
     pinMode(echoB, INPUT);
+    digitalWrite(trigF, LOW);
+    digitalWrite(trigB, LOW);
   }
 
   void registerCallback(LensCallback cb){
@@ -35,29 +37,29 @@ public:
 
   void tick(){
     switch(state){
-      case Idle:
-        if(lastTime + 5500 > micros())return;
-        lastTime = micros();
-        state = LowPulse;
-        digitalWrite(triggerPin, LOW);
-        return;
-       case LowPulse:
-       if(lastTime + 10 > micros())return;
-        state = temp == BAD_STATE ? MeasuringF : MeasuringB;
-        digitalWrite(triggerPin, HIGH);
-        lastTime = micros();
-        return;
-       case MeasuringF:
-       if(lastTime + WAIT_TIME > micros())return;
-       state = Idle;
-       temp = pulseIn(echoFront, HIGH, PULSE_TIMEOUT) / 59;
-       return;
-       case MeasuringB:
-       if(lastTime + WAIT_TIME > micros())return;
-       int backD = pulseIn(echoBack, HIGH, PULSE_TIMEOUT) / 59;
-       cb(temp, backD);
-       temp = BAD_STATE;
-       state = Idle;
+       case PulseF:
+         if(lastTime + WAIT_TIME > micros()) return;
+         digitalWrite(triggerF, HIGH);
+         state = MeasureF;
+         lastTime =  micros();
+       case MeasureF:
+         if(lastTime + WAIT_TIME > micros()) return;
+         digitalWrite(triggerF, LOW);
+         temp = pulseIn(echoFront, HIGH, PULSE_TIMEOUT) / 59;
+         state = PulseB;
+         lastTime =  micros();
+       case PulseB:
+         if(lastTime + WAIT_TIME > micros()) return;
+         digitalWrite(triggerB, HIGH);
+         state = MeasureB;
+         lastTime =  micros();
+       case MeasureB:
+         if(lastTime + WAIT_TIME > micros()) return;
+         digitalWrite(triggerB, LOW);
+         int backDistance = pulseIn(echoBack, HIGH, PULSE_TIMEOUT) / 59;
+         cb(temp, backDistance);
+         state = PulseF;
+         lastTime =  micros();
       }
   }
 

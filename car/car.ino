@@ -22,7 +22,7 @@ void setup(){
   Engine* en1 = new Engine(3,2,4);
   Engine* en2 = new Engine(5,6,7);
   transmission = new Transmission(en1, en2);
-  lens = new Lens( 13, 12, 11);
+  lens = new Lens(9, 13, 8, 12);
   lens->registerCallback(&onMeasure);
   tracking = micros();
 }
