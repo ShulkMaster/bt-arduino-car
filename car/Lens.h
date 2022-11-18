@@ -2,6 +2,7 @@ typedef void (*LensCallback)(int front, int back);
 
 #define BAD_STATE -69
 #define WAIT_TIME 20
+#define PULSE_TIMEOUT 400000
 
 enum LensState {
   Idle,
@@ -49,11 +50,11 @@ public:
        case MeasuringF:
        if(lastTime + WAIT_TIME > micros())return;
        state = Idle;
-       temp = pulseIn(echoFront, HIGH) / 59;
+       temp = pulseIn(echoFront, HIGH, PULSE_TIMEOUT) / 59;
        return;
        case MeasuringB:
        if(lastTime + WAIT_TIME > micros())return;
-       int backD = pulseIn(echoBack, HIGH) / 59;
+       int backD = pulseIn(echoBack, HIGH, PULSE_TIMEOUT) / 59;
        cb(temp, backD);
        temp = BAD_STATE;
        state = Idle;
