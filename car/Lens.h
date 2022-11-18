@@ -1,7 +1,7 @@
 typedef void (*LensCallback)(int front, int back);
 
 #define BAD_STATE -69
-#define WAIT_TIME 10
+#define WAIT_TIME 20
 
 enum LensState {
   Idle,
@@ -17,7 +17,7 @@ class Lens {
   const byte echoFront;
   const byte echoBack;
   LensCallback cb = NULL;
-  unsigned long lastTime;
+  unsigned long lastTime = 0;
   LensState state = Idle;
   int temp = BAD_STATE;
 
@@ -35,12 +35,13 @@ public:
   void tick(){
     switch(state){
       case Idle:
+        if(lastTime + 5500 > micros())return;
         lastTime = micros();
         state = LowPulse;
         digitalWrite(triggerPin, LOW);
         return;
        case LowPulse:
-       if(lastTime + WAIT_TIME + 10 > micros())return;
+       if(lastTime + 10 > micros())return;
         state = temp == BAD_STATE ? MeasuringF : MeasuringB;
         digitalWrite(triggerPin, HIGH);
         lastTime = micros();

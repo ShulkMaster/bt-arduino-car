@@ -28,14 +28,12 @@ void setup(){
 }
 
 void onMeasure(int front, int back) {
-  Serial.print("From last time ");
-  Serial.println((micros() - tracking) / 1000);
   Serial.print("Measures in CM ");
   Serial.print(front);
   Serial.print(" ");
   Serial.println(back);
   tracking = micros();
-  delay(250);
+  delay(50);
 }
 
 void loop(){
