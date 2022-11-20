@@ -3,13 +3,30 @@
 
 #define LENS_KIND 'L'
 #define TEXT_KIND 'T'
-#define READY_KIND 'K'
+#define CHALLENGE_KIND 'C'
+#define CHALLENGE_RESPONSE_KIND 'Z'
 #define SPEED_KIND 'S'
 
 struct Message {
     const byte Kind;
-    
     Message(byte kind): Kind(kind) {}
+};
+
+struct ChallengeMessage: Message
+{
+    char letter;
+    short firts;
+    short second;
+    ChallengeMessage(): Message(CHALLENGE_KIND) {}
+};
+
+const short challengeMessageSize =  sizeof(ChallengeMessage);
+
+struct ChallengeResponseMessage: Message
+{
+    char letter;
+    short sum;
+    ChallengeResponseMessage(): Message(CHALLENGE_RESPONSE_KIND) {}
 };
 
 struct LensMessage: Message {
@@ -28,9 +45,12 @@ struct TextMessage: Message {
 };
 
 struct SpeedMessage: Message {
-    short lenght;
-    char* chars;
-    TextMessage(): Message(TEXT_KIND) {}
+    short speeedLeft;
+    short speeedRight;
+    SpeedMessage(): Message(SPEED_KIND) {}
 };
+
+// 1byte padding
+const short speedMessageSize =  sizeof(SpeedMessage) - 1;
 
 #endif
