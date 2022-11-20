@@ -1,6 +1,7 @@
 #include <SoftwareSerial.h>
 #include "lib/SerialConnection.h"
 #include "DualSerial.h"
+#include "GpioMap.h"
 
 char letters[12] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'o', 'u', 't'};
 unsigned long nextTick = 0;
@@ -10,14 +11,7 @@ DualSerial* dStream = new DualSerial();
 bool forward = true;
 
 void onLensChange(LensMessage);
-
-template <typename Func>
-void vPrint(Func f)
-{
-  Serial.swap();
-  f();
-  Serial.swap();
-}
+void onStatusChange(ConnectionState);
 
 void setup()
 {
@@ -25,6 +19,7 @@ void setup()
   Serial.swap();
   conn = new SerialConnection(true, dStream);
   conn->onMessage(&onLensChange);
+  conn->onMessage(&onStatusChange);
 }
 
 void loop()
@@ -39,6 +34,28 @@ short speedCalc(short distance)
   if (distance <= 10)
     return 0;
   return 4 * distance - 40;
+}
+
+void onStatusChange(ConnectionState s){
+  String  msg;
+  switch(s){
+    case Disconected:
+      msg = "Disconected";
+      break;
+    case Connecting:
+      msg = "Connecting";
+      break;
+      case Connected:
+      msg = "Connected";
+      break;
+    case Timeout:
+      msg = "Timeout";
+      break;
+      case Invalid:
+      msg = "Invalid";
+      break;
+  }
+  Serial.println(msg);
 }
 
 void onLensChange(LensMessage lnsm)
@@ -56,11 +73,10 @@ void onLensChange(LensMessage lnsm)
   {
     newSpeed = speedCalc(backDistance);
   }
-  vPrint([&frontDistance, &backDistance](){
-    Serial.print("Lens recevied ");
-    Serial.print(frontDistance);
-    Serial.print(' ');
-    Serial.println(backDistance);
-  });
+  
+  Serial.print("Lens recevied ");
+  Serial.print(frontDistance);
+  Serial.print(' ');
+  Serial.println(backDistance);
   conn->send(spm);
 }
