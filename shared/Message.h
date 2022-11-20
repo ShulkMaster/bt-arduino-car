@@ -3,7 +3,8 @@
 
 #define LENS_KIND 'L'
 #define TEXT_KIND 'T'
-#define READY_KIND 'R'
+#define READY_KIND 'K'
+#define SPEED_KIND 'S'
 
 struct Message {
     const byte Kind;
@@ -21,6 +22,12 @@ struct LensMessage: Message {
 const short lensMessageSize =  sizeof(LensMessage) - 1;
 
 struct TextMessage: Message {
+    short lenght;
+    char* chars;
+    TextMessage(): Message(TEXT_KIND) {}
+};
+
+struct SpeedMessage: Message {
     short lenght;
     char* chars;
     TextMessage(): Message(TEXT_KIND) {}
