@@ -7,50 +7,57 @@
 #define CHALLENGE_RESPONSE_KIND 'Z'
 #define SPEED_KIND 'S'
 
-struct Message {
+struct Message
+{
     const byte Kind;
-    Message(byte kind): Kind(kind) {}
+    Message(byte kind) : Kind(kind) {}
 };
 
-struct ChallengeMessage: Message
+struct ChallengeMessage : Message
 {
     char letter;
     short firts;
     short second;
-    ChallengeMessage(): Message(CHALLENGE_KIND) {}
+    ChallengeMessage() : Message(CHALLENGE_KIND) {}
 };
 
-const short challengeMessageSize =  sizeof(ChallengeMessage);
+// 1 byte padding
+const short challengeMessageSize = sizeof(ChallengeMessage) - 1;
 
-struct ChallengeResponseMessage: Message
+struct ChallengeResponseMessage : Message
 {
     char letter;
     short sum;
-    ChallengeResponseMessage(): Message(CHALLENGE_RESPONSE_KIND) {}
+    ChallengeResponseMessage() : Message(CHALLENGE_RESPONSE_KIND) {}
 };
 
-struct LensMessage: Message {
+const short challengeResponseMessageSize = sizeof(ChallengeResponseMessage);
+
+struct LensMessage : Message
+{
     short frontD;
     short backD;
-    LensMessage(): Message(LENS_KIND) {}
+    LensMessage() : Message(LENS_KIND) {}
 };
 
 // 1byte padding
-const short lensMessageSize =  sizeof(LensMessage) - 1;
+const short lensMessageSize = sizeof(LensMessage) - 1;
 
-struct TextMessage: Message {
+struct TextMessage : Message
+{
     short lenght;
-    char* chars;
-    TextMessage(): Message(TEXT_KIND) {}
+    char *chars;
+    TextMessage() : Message(TEXT_KIND) {}
 };
 
-struct SpeedMessage: Message {
+struct SpeedMessage : Message
+{
     short speeedLeft;
     short speeedRight;
-    SpeedMessage(): Message(SPEED_KIND) {}
+    SpeedMessage() : Message(SPEED_KIND) {}
 };
 
 // 1byte padding
-const short speedMessageSize =  sizeof(SpeedMessage) - 1;
+const short speedMessageSize = sizeof(SpeedMessage) - 1;
 
 #endif

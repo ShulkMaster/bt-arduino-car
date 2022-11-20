@@ -1,18 +1,21 @@
 #include <SoftwareSerial.h>
 #include "lib/SerialConnection.h"
+#include "DualSerial.h"
 
 char letters[12] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'o', 'u', 't'};
 unsigned long nextTick = 0;
 
 SerialConnection *conn = NULL;
+DualSerial* dStream = new DualSerial();
 bool forward = true;
 
 void onLensChange(LensMessage);
 
-void vPrint(void (*lambda)())
+template <typename Func>
+void vPrint(Func f)
 {
   Serial.swap();
-  lambda();
+  f();
   Serial.swap();
 }
 
@@ -20,15 +23,13 @@ void setup()
 {
   Serial.begin(115200);
   Serial.swap();
-  conn = new SerialConnection(true, &Serial);
-  conn->onLensMessage(&onLensChange);
+  conn = new SerialConnection(true, dStream);
+  conn->onMessage(&onLensChange);
 }
 
 void loop()
 {
   conn->tick();
-  if (nextTick + 2000 > millis())
-    return;
 }
 
 short speedCalc(short distance)
@@ -55,7 +56,7 @@ void onLensChange(LensMessage lnsm)
   {
     newSpeed = speedCalc(backDistance);
   }
-  vPrint([](){
+  vPrint([&frontDistance, &backDistance](){
     Serial.print("Lens recevied ");
     Serial.print(frontDistance);
     Serial.print(' ');
