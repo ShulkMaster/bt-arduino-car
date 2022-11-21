@@ -7,6 +7,15 @@
 #define CHALLENGE_RESPONSE_KIND 'Z'
 #define SPEED_KIND 'S'
 
+bool isMessageKind(byte b)
+{
+    return b == LENS_KIND 
+    || b == TEXT_KIND 
+    || b == CHALLENGE_KIND
+    || b == CHALLENGE_RESPONSE_KIND
+    || b == SPEED_KIND;
+}
+
 struct Message
 {
     const byte Kind;

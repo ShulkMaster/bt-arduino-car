@@ -5,6 +5,7 @@
 Transmission* transmission = NULL;
 Lens* lens = NULL;
 SerialConnection* conn = NULL;
+unsigned long tracked = 0;
 
 void setup(){
   Serial.begin(115200);
@@ -25,40 +26,40 @@ void onMeasure(int front, int back) {
 }
 
 void onStatusChange(ConnectionState s){
-  int led = 0;
-  String msg;
-  switch(s){
-    case Disconected:
-      msg = "Disconected";
-      led = 2;
-      break;
-    case Connecting:
-      msg = "Connecting";
-      led = 3;
-      break;
-      case Connected:
-      msg = "Connected";
-      led = 4;
-      break;
-    case Timeout:
-      msg = "Timeout";
-      break;
-      led = 5;
-      case Invalid:
-      msg = "Invalid";
-      led = 6;
-      break;
-  }
   digitalWrite(2, LOW);
   digitalWrite(3, LOW);
   digitalWrite(4, LOW);
   digitalWrite(5, LOW);
   digitalWrite(6, LOW);
-  digitalWrite(led, HIGH);
+  switch(s){
+    case Disconected:
+      digitalWrite(2, HIGH);
+      break;
+    case Connecting:
+      digitalWrite(4, HIGH);
+      break;
+      case Connected:
+      digitalWrite(3, HIGH);
+      break;
+    case Timeout:
+      case Invalid:
+      break;
+    case Incomming:
+    digitalWrite(3, HIGH);
+    digitalWrite(4, HIGH);
+     break;
+  }
   }
 
 void loop(){
-   if(conn->getState() == Connected){
+   if(conn->getState() == Connected || conn->getState() == Incomming){
+    if(tracked + 200 < millis()){
+      int x = 110;
+      float rads = (PI * 2)/1000;
+      x += 12 * sin(rads * millis());
+      onMeasure(x, x);
+      tracked = millis();
+     }
     //lens->tick();
    }
    conn->tick();

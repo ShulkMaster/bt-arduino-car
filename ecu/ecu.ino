@@ -55,6 +55,9 @@ void onStatusChange(ConnectionState s){
       case Invalid:
       msg = "Invalid";
       break;
+      case Incomming:
+      msg = "Incoming";
+      break;
   }
   Serial.println(msg);
 }
