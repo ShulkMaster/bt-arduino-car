@@ -1,9 +1,9 @@
 #include "Serializer.h"
 #include "Deserializer.h"
 
-#define ConnectionWaitTime 2000
-#define ConnectionWaitTimeout 2500
-#define FIRST_LETTER 'a'
+#define ConnectionWaitTime 500
+#define ConnectionWaitTimeout 700
+#define FIRST_LETTER 'b'
 #define FIRST_LETTER_REPLY 'e'
 #define LETTER_OK '+'
 
@@ -38,7 +38,8 @@ public:
         this->m_serial = ss;
     }
 
-    ConnectionState getState() {
+    ConnectionState getState()
+    {
         return state;
     }
 
@@ -58,8 +59,9 @@ public:
                 handleConnecting();
             break;
         case Timeout:
-            if(track + ConnectionWaitTime > millis())
-            return;
+        case Invalid:
+            if (track + ConnectionWaitTime > millis())
+                return;
             setState(Disconected);
         }
     }
@@ -105,9 +107,9 @@ private:
         if (starter)
         {
             ChallengeMessage m;
-            m.letter = LETTER_OK;
-            m.firts = -1;
-            m.second = 1;
+            m.letter = FIRST_LETTER;
+            m.firts = 69;
+            m.second = 7;
             send(m);
         }
     }
@@ -117,23 +119,22 @@ private:
         byte span = m_serial->peek();
         if (span > -1 && span == CHALLENGE_KIND)
         {
-            if(m_serial->available() < challengeMessageSize) return;
+            if (m_serial->available() < challengeMessageSize)
+                return;
             ChallengeMessage m;
-            m_serial->println("SI");
             byte buff[challengeMessageSize] = {0};
             m_serial->readBytes(buff, challengeMessageSize);
             deserialize(m, buff);
-            m_serial->print(m.letter);
-            m_serial->print(' ');
-            m_serial->print(m.firts);
-            m_serial->print(' ');
-            m_serial->println(m.second);
-            if(m.letter = LETTER_OK && m.firts - m.second == -2){
+            if (m.letter == LETTER_OK && m.firts - m.second == -2)
+            {
                 setState(Connected);
                 return;
             }
+
             ChallengeResponseMessage response;
-            response.letter = m.letter == FIRST_LETTER ? FIRST_LETTER_REPLY : ':';
+            response.letter = m.letter == FIRST_LETTER
+                                  ? FIRST_LETTER_REPLY
+                                  : '$';
             response.sum = m.firts + m.second;
             send(response);
             return;
@@ -149,12 +150,22 @@ private:
             return;
         }
 
-        if (m_serial->available() >= challengeResponseMessageSize)
+        byte span = m_serial->peek();
+        if (span > -1 && span == CHALLENGE_RESPONSE_KIND)
         {
+            if (m_serial->available() < challengeResponseMessageSize)
+                return;
+            Serial.println("[");
             ChallengeResponseMessage m;
-            byte *buff;
+            byte *buff = new byte[challengeResponseMessageSize];
             m_serial->readBytes(buff, challengeResponseMessageSize);
             deserialize(m, buff);
+            for (int i = 0; i < challengeResponseMessageSize; i++)
+            {
+                Serial.print(buff[i], HEX);
+            }
+            Serial.println();
+            delete buff;
             if (m.letter == FIRST_LETTER_REPLY && m.sum == 76)
             {
                 setState(Connected);
@@ -167,5 +178,8 @@ private:
             }
             setState(Invalid);
         }
+        short x = m_serial->read();
+        if (x > -1)
+            Serial.print(x, HEX);
     }
 };
