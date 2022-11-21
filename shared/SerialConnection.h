@@ -1,11 +1,11 @@
 #include "Serializer.h"
 #include "Deserializer.h"
 
-#define ConnectionWaitTime 200
-#define ConnectionWaitTimeout 250
+#define ConnectionWaitTime 2000
+#define ConnectionWaitTimeout 2500
 #define FIRST_LETTER 'a'
 #define FIRST_LETTER_REPLY 'e'
-#define LETTER_OK 'k'
+#define LETTER_OK '+'
 
 enum ConnectionState
 {
@@ -57,6 +57,10 @@ public:
             else
                 handleConnecting();
             break;
+        case Timeout:
+            if(track + ConnectionWaitTime > millis())
+            return;
+            setState(Disconected);
         }
     }
 
@@ -66,6 +70,7 @@ public:
         int size;
         byte *bts = serialize(m, size);
         int sent = m_serial->write(bts, size);
+        delete bts;
         return size == sent;
     }
 
@@ -100,30 +105,40 @@ private:
         if (starter)
         {
             ChallengeMessage m;
-            m.letter = FIRST_LETTER;
-            m.firts = 7;
-            m.second = 69;
+            m.letter = LETTER_OK;
+            m.firts = -1;
+            m.second = 1;
             send(m);
         }
     }
 
     void handleConnecting()
     {
-        if (m_serial->available() >= challengeMessageSize)
+        byte span = m_serial->peek();
+        if (span > -1 && span == CHALLENGE_KIND)
         {
+            if(m_serial->available() < challengeMessageSize) return;
             ChallengeMessage m;
-            byte *buff;
+            m_serial->println("SI");
+            byte buff[challengeMessageSize] = {0};
             m_serial->readBytes(buff, challengeMessageSize);
             deserialize(m, buff);
+            m_serial->print(m.letter);
+            m_serial->print(' ');
+            m_serial->print(m.firts);
+            m_serial->print(' ');
+            m_serial->println(m.second);
             if(m.letter = LETTER_OK && m.firts - m.second == -2){
                 setState(Connected);
                 return;
             }
             ChallengeResponseMessage response;
-            response.letter = m.letter == FIRST_LETTER ? FIRST_LETTER_REPLY : 'x';
+            response.letter = m.letter == FIRST_LETTER ? FIRST_LETTER_REPLY : ':';
             response.sum = m.firts + m.second;
             send(response);
+            return;
         }
+        m_serial->read();
     }
 
     void handleConnectingStart()

@@ -22,7 +22,7 @@ struct ChallengeMessage : Message
 };
 
 // 1 byte padding
-const short challengeMessageSize = sizeof(ChallengeMessage) - 1;
+const short challengeMessageSize = sizeof(ChallengeMessage);
 
 struct ChallengeResponseMessage : Message
 {

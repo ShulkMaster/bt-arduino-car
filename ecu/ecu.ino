@@ -16,7 +16,7 @@ void onStatusChange(ConnectionState);
 void setup()
 {
   Serial.begin(115200);
-  Serial.swap();
+  Serial1.begin(115200);
   conn = new SerialConnection(true, dStream);
   conn->onMessage(&onLensChange);
   conn->onMessage(&onStatusChange);
@@ -38,6 +38,7 @@ short speedCalc(short distance)
 
 void onStatusChange(ConnectionState s){
   String  msg;
+        
   switch(s){
     case Disconected:
       msg = "Disconected";

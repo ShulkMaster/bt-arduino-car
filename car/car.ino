@@ -14,6 +14,7 @@ void setup(){
   lens = new Lens(9, 13, 8, 12);
   lens->registerCallback(&onMeasure);
   conn = new SerialConnection(false, &Serial);
+  conn->onMessage(&onStatusChange);
 }
 
 void onMeasure(int front, int back) {
@@ -23,7 +24,42 @@ void onMeasure(int front, int back) {
   conn->send(msg);
 }
 
+void onStatusChange(ConnectionState s){
+  int led = 0;
+  String msg;
+  switch(s){
+    case Disconected:
+      msg = "Disconected";
+      led = 2;
+      break;
+    case Connecting:
+      msg = "Connecting";
+      led = 3;
+      break;
+      case Connected:
+      msg = "Connected";
+      led = 4;
+      break;
+    case Timeout:
+      msg = "Timeout";
+      break;
+      led = 5;
+      case Invalid:
+      msg = "Invalid";
+      led = 6;
+      break;
+  }
+  digitalWrite(2, LOW);
+  digitalWrite(3, LOW);
+  digitalWrite(4, LOW);
+  digitalWrite(5, LOW);
+  digitalWrite(6, LOW);
+  digitalWrite(led, HIGH);
+  }
+
 void loop(){
-   lens->tick();
+   if(conn->getState() == Connected){
+    //lens->tick();
+   }
    conn->tick();
 }

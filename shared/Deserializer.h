@@ -16,10 +16,8 @@ void deserialize(LensMessage &m, byte *buff)
 
 void deserialize(ChallengeMessage &m, byte *buff) {
     m.letter = buff[1];
-    byte index = 2;
-    m.firts = fromBigEndian(index, buff);
-    index+= sizeof(short);
-    m.second = fromBigEndian(index, buff);
+    m.firts = fromBigEndian(2, buff);
+    m.second = fromBigEndian(4, buff);
 }
 
 void deserialize(ChallengeResponseMessage &m, byte *buff) {
