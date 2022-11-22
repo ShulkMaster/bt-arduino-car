@@ -20,9 +20,13 @@ void setup(){
 }
 
 void onMeasure(short front, short back) {
+  if(tracked + 100 > millis()){
+    return;
+    }
   LensMessage msg;
   msg.frontD = front;
   msg.backD = back;
+  tracked = millis();
   conn->send(msg);
 }
 
@@ -58,14 +62,7 @@ void onStatusChange(ConnectionState s){
 
 void loop(){
    if(conn->getState() == Connected || conn->getState() == Incomming){
-    if(tracked + 500 < millis()){
-      int x = 110;
-      float rads = (PI * 2)/100;
-      x += 12 * sin(rads * millis());
-      onMeasure(1069, 496);
-      tracked = millis();
-     }
-    //lens->tick();
+    lens->tick();
    }
    conn->tick();
 }
