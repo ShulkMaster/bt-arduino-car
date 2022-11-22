@@ -57,7 +57,6 @@ void onStatusChange(ConnectionState s){
       break;
       case Incomming:
       msg = "Incoming";
-      break;
   }
   Serial.println(msg);
 }
@@ -82,5 +81,7 @@ void onLensChange(LensMessage lnsm)
   Serial.print(frontDistance);
   Serial.print(' ');
   Serial.println(backDistance);
+  Serial.print("Send speed ");
+  Serial.println(newSpeed);
   conn->send(spm);
 }

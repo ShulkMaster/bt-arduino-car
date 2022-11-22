@@ -9,10 +9,13 @@ byte* serialize(LensMessage &m, int &size) {
     size = lensMessageSize;
     byte* data = new byte[size];
     data[0] = m.Kind;
-    byte index = 1;
-    toBigEndian(m.frontD, index, data);
-    index+= 2;
-    toBigEndian(m.backD, index, data);
+    toBigEndian(m.frontD, 1, data);
+    toBigEndian(m.backD, 3, data);
+    Serial.println();
+    for (int i = 0; i < lensMessageSize; i++)
+      {
+        Serial.println(data[i], HEX);
+      }
     return data;
 }
 

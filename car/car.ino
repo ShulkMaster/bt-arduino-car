@@ -16,14 +16,19 @@ void setup(){
   lens->registerCallback(&onMeasure);
   conn = new SerialConnection(false, &Serial);
   conn->onMessage(&onStatusChange);
+  conn->onMessage(&onSpeedChange);
 }
 
-void onMeasure(int front, int back) {
+void onMeasure(short front, short back) {
   LensMessage msg;
   msg.frontD = front;
   msg.backD = back;
   conn->send(msg);
 }
+
+void onSpeedChange(SpeedMessage m){
+  //Serial.print(m.speeedLeft);
+ }
 
 void onStatusChange(ConnectionState s){
   digitalWrite(2, LOW);
@@ -53,11 +58,11 @@ void onStatusChange(ConnectionState s){
 
 void loop(){
    if(conn->getState() == Connected || conn->getState() == Incomming){
-    if(tracked + 200 < millis()){
+    if(tracked + 500 < millis()){
       int x = 110;
-      float rads = (PI * 2)/1000;
+      float rads = (PI * 2)/100;
       x += 12 * sin(rads * millis());
-      onMeasure(x, x);
+      onMeasure(617, 63);
       tracked = millis();
      }
     //lens->tick();

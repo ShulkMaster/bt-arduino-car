@@ -123,7 +123,7 @@ private:
   void handleConnecting()
   {
     byte span = m_serial->peek();
-    if (span > -1 && span == CHALLENGE_KIND)
+    if (span == CHALLENGE_KIND)
     {
       if (m_serial->available() < challengeMessageSize)
         return;
@@ -131,7 +131,10 @@ private:
       byte buff[challengeMessageSize] = {0};
       m_serial->readBytes(buff, challengeMessageSize);
       deserialize(m, buff);
-      if (m.letter == LETTER_OK && m.firts - m.second == -2)
+      m_serial->println();
+      m_serial->println(m.letter);
+      m_serial->println(m.firts);
+      if (m.letter == LETTER_OK)
       {
         setState(Connected);
         return;
@@ -150,14 +153,14 @@ private:
 
   void handleConnectingStart()
   {
-    if (millis() > track + ConnectionWaitTimeout)
+    if (millis() > track + ConnectionWaitTimeout + 20)
     {
       setState(Timeout);
       return;
     }
 
     byte span = m_serial->peek();
-    if (span > -1 && span == CHALLENGE_RESPONSE_KIND)
+    if (span == CHALLENGE_RESPONSE_KIND)
     {
       if (m_serial->available() < challengeResponseMessageSize)
         return;
@@ -173,12 +176,12 @@ private:
       delete buff;
       if (m.letter == FIRST_LETTER_REPLY && m.sum == 76)
       {
+        ChallengeMessage confirmation;
+        confirmation.letter = LETTER_OK;
+        confirmation.firts = -1;
+        confirmation.second = 1;
+        send(confirmation);
         setState(Connected);
-        ChallengeMessage m;
-        m.letter = LETTER_OK;
-        m.firts = -1;
-        m.second = 1;
-        send(m);
         return;
       }
       setState(Invalid);
@@ -209,6 +212,11 @@ private:
         buff = new byte[lensMessageSize];
         m_serial->readBytes(buff, lensMessageSize);
         deserialize(m, buff);
+        for (int i = 0; i < lensMessageSize; i++)
+        {
+          Serial.print(buff[i], HEX);
+        }
+        Serial.println();
         lensCb(m);
         setState(Connected);
       }
@@ -225,40 +233,9 @@ private:
       }
       break;
     case CHALLENGE_KIND:
-      if (!starter)
-      {
-        if (m_serial->available() < challengeMessageSize)
-          return;
-        ChallengeMessage m;
-        buff = new byte[challengeMessageSize];
-        m_serial->readBytes(buff, challengeMessageSize);
-        deserialize(m, buff);
-        ChallengeResponseMessage response = accepted(m);
-        setState(Connecting);
-        send(response);
-      }
-      else
-      {
-        m_serial->read();
-        setState(Connected);
-      }
       break;
     case CHALLENGE_RESPONSE_KIND:
-      if (starter)
-      {
-        if (m_serial->available() < challengeResponseMessageSize)
-          return;
-        ChallengeResponseMessage m;
-        buff = new byte[challengeResponseMessageSize];
-        m_serial->readBytes(buff, challengeResponseMessageSize);
-        deserialize(m, buff);
-        checkChallenge(m);
-      }
-      else
-      {
-        m_serial->read();
-        setState(Connected);
-      }
+      break;
     default:
       break;
     }
