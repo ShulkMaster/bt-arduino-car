@@ -39,9 +39,7 @@ byte* serialize(SpeedMessage &m, int &size) {
     size = speedMessageSize;
     byte* data = new byte[size];
     data[0] = m.Kind;
-    byte index = 1;
-    toBigEndian(m.speeedLeft, index, data);
-    index+= sizeof(SpeedMessage::speeedLeft);
-    toBigEndian(m.speeedRight, index, data);
+    toBigEndian(m.speedLeft, 1, data);
+    toBigEndian(m.speedRight, 3, data);
     return data;
 }

@@ -81,7 +81,7 @@ void onLensChange(LensMessage lnsm)
   Serial.print(frontDistance);
   Serial.print(' ');
   Serial.println(backDistance);
-  Serial.print("Send speed ");
-  Serial.println(newSpeed);
+  spm.speedLeft = newSpeed;
+  spm.speedRight = newSpeed;
   conn->send(spm);
 }

@@ -26,6 +26,6 @@ void deserialize(ChallengeResponseMessage &m, byte *buff) {
 }
 
 void deserialize(SpeedMessage &m, byte *buff) {
-    m.speeedLeft = fromBigEndian(1, buff);
-    m.speeedRight = fromBigEndian(1 + sizeof(SpeedMessage::speeedLeft), buff);
+    m.speedLeft = fromBigEndian(1, buff);
+    m.speedRight = fromBigEndian(3, buff);
 }

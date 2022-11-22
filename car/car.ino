@@ -32,11 +32,15 @@ void onMeasure(short front, short back) {
 }
 
 void onSpeedChange(SpeedMessage m){
-  if(m.speeedLeft >=0){
-    transmission->advance(m.speeedLeft, 90);
+  Serial.println();
+  Serial.print(m.speedLeft);
+  Serial.print(' ');
+  Serial.println(m.speedRight);
+  if(m.speedLeft >=0){
+    transmission->advance(m.speedLeft, 90);
     return;
     }
-  transmission->reverse(abs(m.speeedLeft), 90);
+  transmission->reverse(abs(m.speedLeft), 90);
  }
 
 void onStatusChange(ConnectionState s){

@@ -49,7 +49,6 @@ struct LensMessage : Message
     LensMessage() : Message(LENS_KIND) {}
 };
 
-// 1byte padding
 const short lensMessageSize = sizeof(LensMessage);
 
 struct TextMessage : Message
@@ -61,12 +60,11 @@ struct TextMessage : Message
 
 struct SpeedMessage : Message
 {
-    short speeedLeft;
-    short speeedRight;
+    short speedLeft;
+    short speedRight;
     SpeedMessage() : Message(SPEED_KIND) {}
 };
 
-// 1byte padding
-const short speedMessageSize = sizeof(SpeedMessage) - 1;
+const short speedMessageSize = sizeof(SpeedMessage);
 
 #endif
