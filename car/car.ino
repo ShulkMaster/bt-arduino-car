@@ -62,7 +62,7 @@ void loop(){
       int x = 110;
       float rads = (PI * 2)/100;
       x += 12 * sin(rads * millis());
-      onMeasure(617, 63);
+      onMeasure(1069, 496);
       tracked = millis();
      }
     //lens->tick();
