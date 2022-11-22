@@ -30,6 +30,10 @@ void onMeasure(short front, short back)
   LensMessage msg;
   msg.frontD = front;
   msg.backD = back;
+  Serial.println();
+  Serial.print(front);
+  Serial.print('#');
+  Serial.println(back);
   tracked = millis();
   conn->send(msg);
 }
@@ -69,13 +73,10 @@ void loop()
   {
     lens->tick();
   }
+  
   conn->tick();
   if (millis() - conn->lastReceived() > ConnectionWaitTimeout)
   {
-    Serial.print("stop");
-    SpeedMessage spm;
-    spm.speedLeft = 0;
-    spm.speedRight = 0;
-    transmission->move(spm);
+    transmission->stop();
   }
 }

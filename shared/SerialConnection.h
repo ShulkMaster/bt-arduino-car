@@ -123,8 +123,8 @@ private:
     {
       ChallengeMessage m;
       m.letter = FIRST_LETTER;
-      m.firts = 69;
-      m.second = 7;
+      m.firts = 50;
+      m.second = 19;
       send(m);
     }
   }
@@ -140,9 +140,7 @@ private:
       byte buff[challengeMessageSize] = {0};
       m_serial->readBytes(buff, challengeMessageSize);
       deserialize(m, buff);
-      m_serial->println();
-      m_serial->println(m.letter);
-      m_serial->println(m.firts);
+
       if (m.letter == LETTER_OK)
       {
         setState(Connected);
@@ -177,13 +175,9 @@ private:
       byte *buff = new byte[challengeResponseMessageSize];
       m_serial->readBytes(buff, challengeResponseMessageSize);
       deserialize(m, buff);
-      for (int i = 0; i < challengeResponseMessageSize; i++)
-      {
-        Serial.print(buff[i], HEX);
-      }
-      Serial.println();
       delete buff;
-      if (m.letter == FIRST_LETTER_REPLY && m.sum == 76)
+
+      if (m.letter == FIRST_LETTER_REPLY && m.sum == 69)
       {
         ChallengeMessage confirmation;
         confirmation.letter = LETTER_OK;
@@ -224,6 +218,7 @@ private:
         for (int i = 0; i < lensMessageSize; i++)
         {
           Serial.print(buff[i], HEX);
+          Serial.print(' ');
         }
         Serial.println();
         lensCb(m);

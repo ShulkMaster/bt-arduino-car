@@ -5,15 +5,6 @@ void toBigEndian(int value, short offset, byte* buff) {
   buff[offset + 1] = value;
 }
 
-byte* serialize(LensMessage &m, int &size) {
-    size = lensMessageSize;
-    byte* data = new byte[size];
-    data[0] = m.Kind;
-    toBigEndian(m.frontD, 1, data);
-    toBigEndian(m.backD, 3, data);
-    return data;
-}
-
 byte* serialize(ChallengeMessage &m, int &size) {
     size = challengeMessageSize;
     byte* data = new byte[size];
@@ -41,5 +32,14 @@ byte* serialize(SpeedMessage &m, int &size) {
     data[0] = m.Kind;
     toBigEndian(m.speedLeft, 1, data);
     toBigEndian(m.speedRight, 3, data);
+    return data;
+}
+
+byte* serialize(LensMessage &m, int &size) {
+    size = lensMessageSize;
+    byte* data = new byte[size];
+    data[0] = m.Kind;
+    toBigEndian(m.frontD, 1, data);
+    toBigEndian(m.backD, 3, data);
     return data;
 }

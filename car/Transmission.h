@@ -28,4 +28,9 @@ public:
     en1->setSpeed(abs(spm.speedRight));
     en2->moveforward(spm.speedRight >= 0);
   }
+
+  void stop(){
+    en1->stop();
+    en2->stop();
+  }
 };
