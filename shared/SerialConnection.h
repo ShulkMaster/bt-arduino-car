@@ -31,6 +31,7 @@ private:
   SpeedCallback speedCb = NULL;
   StatusCallback statusCb = NULL;
   unsigned long track = 0;
+  unsigned long lastIncomingMsg = 0;
 
 public:
   SerialConnection(bool start, Stream *ss) : starter(start)
@@ -41,6 +42,11 @@ public:
   ConnectionState getState()
   {
     return state;
+  }
+
+  unsigned long lastReceived()
+  {
+    return lastIncomingMsg;
   }
 
   void tick()
@@ -100,6 +106,9 @@ public:
 private:
   void setState(ConnectionState s)
   {
+    if(state == Incomming && s == Connected){
+      lastIncomingMsg = millis();
+    }
     state = s;
     statusCb(state);
     track = millis();

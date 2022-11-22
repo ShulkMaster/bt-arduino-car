@@ -67,20 +67,21 @@ void onLensChange(LensMessage lnsm)
   const short frontDistance = lnsm.frontD;
   const short backDistance = lnsm.backD;
   short newSpeed = 0;
-
-  if (forward)
-  {
-    newSpeed = speedCalc(frontDistance);
+  newSpeed = speedCalc(forward ? frontDistance : backDistance);
+  if(newSpeed < 1){
+    forward = !forward;
   }
-  else
-  {
-    newSpeed = speedCalc(backDistance);
+
+  if(!forward){
+    newSpeed = -newSpeed;
   }
   
   Serial.print("Lens recevied ");
   Serial.print(frontDistance);
   Serial.print(' ');
   Serial.println(backDistance);
+  Serial.print("Speeds Send ");
+  Serial.println(newSpeed);
   spm.speedLeft = newSpeed;
   spm.speedRight = newSpeed;
   conn->send(spm);
