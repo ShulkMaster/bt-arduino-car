@@ -30,10 +30,6 @@ void onMeasure(short front, short back)
   LensMessage msg;
   msg.frontD = front;
   msg.backD = back;
-  Serial.println();
-  Serial.print(front);
-  Serial.print('#');
-  Serial.println(back);
   tracked = millis();
   conn->send(msg);
 }
