@@ -1,7 +1,7 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#define LENS_KIND 'L'
+#define LENS_KIND 'W'
 #define TEXT_KIND 'T'
 #define CHALLENGE_KIND 'C'
 #define CHALLENGE_RESPONSE_KIND 'Z'
@@ -50,7 +50,7 @@ struct LensMessage : Message
 };
 
 // 1byte padding
-const short lensMessageSize = sizeof(LensMessage) - 1;
+const short lensMessageSize = sizeof(LensMessage);
 
 struct TextMessage : Message
 {

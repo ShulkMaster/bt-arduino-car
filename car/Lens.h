@@ -1,4 +1,4 @@
-typedef void (*LensCallback)(int front, int back);
+typedef void (*LensCallback)(short front, short back);
 
 #define WAIT_TIME 20
 #define PULSE_TIMEOUT 10000
@@ -19,7 +19,7 @@ class Lens {
   LensCallback cb = NULL;
   unsigned long lastTime = 0;
   LensState state = PulseF;
-  int temp = 0;
+  short temp = 0;
 
 public:
   Lens(byte trigF, byte trigB, byte echoF,byte echoB): triggerF(trigF), triggerB(trigB), echoFront(echoF), echoBack(echoB) {
@@ -56,7 +56,7 @@ public:
        case MeasureB:
          if(lastTime + WAIT_TIME > micros()) return;
          digitalWrite(triggerB, LOW);
-         int backDistance = pulseIn(echoBack, HIGH, PULSE_TIMEOUT) / 59;
+         short backDistance = pulseIn(echoBack, HIGH, PULSE_TIMEOUT) / 59;
          cb(temp, backDistance);
          state = PulseF;
          lastTime =  micros();
