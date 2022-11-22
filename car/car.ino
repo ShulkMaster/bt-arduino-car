@@ -19,8 +19,9 @@ void setup(){
   conn->onMessage(&onSpeedChange);
 }
 
+bool alternator = false;
 void onMeasure(short front, short back) {
-  if(tracked + 100 > millis()){
+  if(tracked + 50 > millis()){
     return;
     }
   LensMessage msg;
@@ -31,34 +32,34 @@ void onMeasure(short front, short back) {
 }
 
 void onSpeedChange(SpeedMessage m){
-  //Serial.print(m.speeedLeft);
+  if(m.speeedLeft >=0){
+    transmission->advance(m.speeedLeft, 90);
+    return;
+    }
+  transmission->reverse(abs(m.speeedLeft), 90);
  }
 
 void onStatusChange(ConnectionState s){
-  digitalWrite(2, LOW);
-  digitalWrite(3, LOW);
-  digitalWrite(4, LOW);
-  digitalWrite(5, LOW);
-  digitalWrite(6, LOW);
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
   switch(s){
-    case Disconected:
-      digitalWrite(2, HIGH);
-      break;
     case Connecting:
-      digitalWrite(4, HIGH);
+      digitalWrite(10, HIGH);
       break;
       case Connected:
-      digitalWrite(3, HIGH);
+      digitalWrite(11, HIGH);
       break;
     case Timeout:
-      case Invalid:
+    case Invalid:
+    case Disconected:
       break;
     case Incomming:
-    digitalWrite(3, HIGH);
-    digitalWrite(4, HIGH);
-     break;
+      digitalWrite(10, alternator ? HIGH : LOW);
+      digitalWrite(11, alternator ? LOW : HIGH);
+      alternator = !alternator;
+      break;
   }
-  }
+}
 
 void loop(){
    if(conn->getState() == Connected || conn->getState() == Incomming){
