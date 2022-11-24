@@ -215,12 +215,6 @@ private:
         buff = new byte[lensMessageSize];
         m_serial->readBytes(buff, lensMessageSize);
         deserialize(m, buff);
-        for (int i = 0; i < lensMessageSize; i++)
-        {
-          Serial.print(buff[i], HEX);
-          Serial.print(' ');
-        }
-        Serial.println();
         lensCb(m);
         setState(Connected);
       }

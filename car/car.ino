@@ -6,6 +6,7 @@ Transmission *transmission = NULL;
 Lens *lens = NULL;
 SerialConnection *conn = NULL;
 unsigned long tracked = 0;
+bool forward = true;
 
 void setup()
 {
@@ -17,47 +18,60 @@ void setup()
   lens->registerCallback(&onMeasure);
   conn = new SerialConnection(false, &Serial);
   conn->onMessage(&onStatusChange);
-  conn->onMessage(&onSpeedChange);
+  pinMode(10, OUTPUT);
+  pinMode(11, OUTPUT);
+  digitalWrite(10, HIGH);
+  digitalWrite(11, LOW);
 }
 
 bool alternator = false;
-void onMeasure(short front, short back)
+
+short speedCalc(short distance)
 {
-  if (tracked + 50 > millis())
-  {
-    return;
+  if (distance == 0 || distance >= 10) {
+    return 110;
   }
-  LensMessage msg;
-  msg.frontD = front;
-  msg.backD = back;
-  tracked = millis();
-  conn->send(msg);
+  return 0;
 }
 
-void onSpeedChange(SpeedMessage m)
+void onMeasure(short front, short back)
 {
-  transmission->move(m);
+  short newSpeed = 0;
+  newSpeed = speedCalc(forward ? front : back);
+  if (newSpeed < 1)
+  {
+    forward = !forward;
+  }
+
+  if (!forward)
+  {
+    newSpeed = -newSpeed;
+  }
+
+  SpeedMessage spm;
+  spm.speedLeft = newSpeed;
+  spm.speedRight = newSpeed;
+  transmission->move(spm);
 }
 
 void onStatusChange(ConnectionState s)
 {
-  digitalWrite(10, LOW);
-  digitalWrite(11, LOW);
   switch (s)
   {
   case Connecting:
-    digitalWrite(10, HIGH);
-    break;
-  case Connected:
-    digitalWrite(11, HIGH);
-    break;
   case Timeout:
   case Invalid:
   case Disconected:
+    digitalWrite(10, HIGH);
+    digitalWrite(11, HIGH);
+    break;
+  case Connected:
+    digitalWrite(11, LOW);
+    digitalWrite(10, LOW);
     break;
   case Incomming:
-    digitalWrite(10, alternator ? HIGH : LOW);
-    digitalWrite(11, alternator ? LOW : HIGH);
+    digitalWrite(10, LOW);
+    digitalWrite(11, alternator ? HIGH : LOW);
     alternator = !alternator;
     break;
   }
@@ -69,10 +83,11 @@ void loop()
   {
     lens->tick();
   }
-  
   conn->tick();
-  if (millis() - conn->lastReceived() > ConnectionWaitTimeout)
+  if (millis() - conn->lastReceived() > ConnectionWaitTimeout && tracked + 500 < millis())
   {
     transmission->stop();
+    Serial.print('.');
+    tracked = millis();
   }
 }

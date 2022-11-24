@@ -25,7 +25,7 @@ public:
     en1->setSpeed(abs(spm.speedLeft));
     en1->moveforward(spm.speedLeft >= 0);
 
-    en1->setSpeed(abs(spm.speedRight));
+    en2->setSpeed(abs(spm.speedRight));
     en2->moveforward(spm.speedRight >= 0);
   }
 

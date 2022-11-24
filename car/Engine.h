@@ -4,7 +4,6 @@ private:
   int controlPin;
   int forward;
   int backward;
-  byte speed;
 
 public:
   Engine(int p1, int p2, int p3)
@@ -12,7 +11,6 @@ public:
     this->controlPin = p1;
     this->forward = p2;
     this->backward = p3;
-    this->speed = 0;
     pinMode(controlPin, OUTPUT);
     digitalWrite(controlPin, LOW);
     pinMode(forward, OUTPUT);
@@ -21,20 +19,19 @@ public:
 
   void stop()
   {
-    speed = 0;
-    analogWrite(controlPin, speed);
+    analogWrite(controlPin, 0);
   }
 
   void moveforward(bool forwards = true)
   {
-    digitalWrite(forward, forwards);
-    digitalWrite(backward, !forwards);
-    analogWrite(controlPin, speed);
+    int f1 = forwards ? HIGH : LOW;
+    int f2 = forwards ? LOW : HIGH;
+    digitalWrite(forward, f1);
+    digitalWrite(backward, f2);
   }
 
-  void setSpeed(byte speed)
+  void setSpeed(short speed2)
   {
-    this->speed = speed;
-    analogWrite(controlPin, speed);
+    analogWrite(controlPin, speed2);  
   }
 };

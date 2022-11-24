@@ -3,12 +3,10 @@
 #include "DualSerial.h"
 #include "GpioMap.h"
 
-char letters[12] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'o', 'u', 't'};
 unsigned long nextTick = 0;
 
 SerialConnection *conn = NULL;
 DualSerial* dStream = new DualSerial();
-bool forward = true;
 
 void onLensChange(LensMessage);
 void onStatusChange(ConnectionState);
@@ -27,14 +25,6 @@ void loop()
   conn->tick();
 }
 
-short speedCalc(short distance)
-{
-  if (distance == 0 || distance >= 20)
-    return 220;
-  if (distance <= 10)
-    return 0;
-  return 4 * distance - 40;
-}
 
 void onStatusChange(ConnectionState s){
   String  msg;
@@ -67,14 +57,7 @@ void onLensChange(LensMessage lnsm)
   const short frontDistance = lnsm.frontD;
   const short backDistance = lnsm.backD;
   short newSpeed = 0;
-  newSpeed = speedCalc(forward ? frontDistance : backDistance);
-  if(newSpeed < 1){
-    forward = !forward;
-  }
-
-  if(!forward){
-    newSpeed = -newSpeed;
-  }
+  newSpeed = speedCalc(frontDistance);
   
   Serial.print("Lens recevied ");
   Serial.print(frontDistance);
@@ -82,7 +65,4 @@ void onLensChange(LensMessage lnsm)
   Serial.println(backDistance);
   Serial.print("Speeds Send ");
   Serial.println(newSpeed);
-  spm.speedLeft = newSpeed;
-  spm.speedRight = newSpeed;
-  conn->send(spm);
 }
