@@ -7,6 +7,7 @@ Lens *lens = NULL;
 SerialConnection *conn = NULL;
 unsigned long tracked = 0;
 bool forward = true;
+bool stopped = false;
 SpeedMessage speedy;
 
 void setup()
@@ -33,7 +34,7 @@ bool alternator = false;
 short speedCalc(short distance)
 {
   if (distance == 0 || distance >= 10) {
-    return 110;
+    return 160;
   }
   return 0;
 }
@@ -51,16 +52,22 @@ void onMeasure(short front, short back)
   {
     newSpeed = -newSpeed;
   }
-  
   speedy.speedLeft = newSpeed;
   speedy.speedRight = newSpeed;
+  if(stopped) return;
   transmission->move(speedy);
 }
 
 void onContinueChange(ContinueMessage msg){
+  stopped = msg.shouldContinue;
   if(msg.shouldContinue){
+    Serial.print("y");
+    Serial.print(speedy.speedLeft);
+    Serial.print(' ');
+    Serial.println(speedy.speedRight);
     transmission->move(speedy);
   }else {
+    Serial.print("n");
     transmission->stop();
   }
 }

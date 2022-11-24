@@ -23,7 +23,7 @@ void setup()
 void loop()
 {
   conn->tick();
-  if(nextTick + 500 < millis()){
+  if(nextTick + 3000 < millis()){
     ContinueMessage msg;
     msg.shouldContinue = measuring;
     measuring = !measuring;

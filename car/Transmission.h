@@ -1,6 +1,8 @@
 #include "Engine.h"
 #include "lib/Message.h"
 
+#define COMPENSATION 70
+
 class Transmission
 {
 private:
@@ -22,7 +24,8 @@ public:
 
   void move(SpeedMessage spm)
   {
-    en1->setSpeed(abs(spm.speedLeft-10));
+    short compensated = max(abs(spm.speedLeft) - COMPENSATION, 0);
+    en1->setSpeed(compensated);
     en1->moveforward(spm.speedLeft >= 0);
 
     en2->setSpeed(abs(spm.speedRight));
