@@ -20,6 +20,7 @@ enum ConnectionState
 typedef void (*LensMsgCallback)(LensMessage msg);
 typedef void (*StatusCallback)(ConnectionState msg);
 typedef void (*SpeedCallback)(SpeedMessage msg);
+typedef void (*ContinueCallback)(ContinueMessage msg);
 
 class SerialConnection
 {
@@ -30,6 +31,7 @@ private:
   LensMsgCallback lensCb = NULL;
   SpeedCallback speedCb = NULL;
   StatusCallback statusCb = NULL;
+  ContinueCallback continueCb = NULL;
   unsigned long track = 0;
   unsigned long lastIncomingMsg = 0;
 
@@ -103,10 +105,20 @@ public:
     statusCb = cb;
   }
 
+  void onMessage(ContinueCallback cb)
+  {
+    continueCb = cb;
+  }
+
+  bool available() {
+    return state == Connected || state == Incomming;
+  }
+
 private:
   void setState(ConnectionState s)
   {
-    if(state == Incomming && s == Connected){
+    if (state == Incomming && s == Connected)
+    {
       lastIncomingMsg = millis();
     }
     state = s;
@@ -227,6 +239,17 @@ private:
         m_serial->readBytes(buff, speedMessageSize);
         deserialize(m, buff);
         speedCb(m);
+        setState(Connected);
+      }
+      break;
+    case CONTINUE_KIND:
+      if (m_serial->available() >= continueMessageSize)
+      {
+        ContinueMessage m;
+        buff = new byte[continueMessageSize];
+        m_serial->readBytes(buff, continueMessageSize);
+        deserialize(m, buff);
+        continueCb(m);
         setState(Connected);
       }
       break;

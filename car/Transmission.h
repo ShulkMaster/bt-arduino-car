@@ -22,7 +22,7 @@ public:
 
   void move(SpeedMessage spm)
   {
-    en1->setSpeed(abs(spm.speedLeft));
+    en1->setSpeed(abs(spm.speedLeft-10));
     en1->moveforward(spm.speedLeft >= 0);
 
     en2->setSpeed(abs(spm.speedRight));

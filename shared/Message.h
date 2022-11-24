@@ -6,6 +6,7 @@
 #define CHALLENGE_KIND 'C'
 #define CHALLENGE_RESPONSE_KIND 'Z'
 #define SPEED_KIND 'S'
+#define CONTINUE_KIND 'Q'
 
 bool isMessageKind(byte b)
 {
@@ -13,7 +14,8 @@ bool isMessageKind(byte b)
     || b == TEXT_KIND 
     || b == CHALLENGE_KIND
     || b == CHALLENGE_RESPONSE_KIND
-    || b == SPEED_KIND;
+    || b == SPEED_KIND
+    || b == CONTINUE_KIND;
 }
 
 struct Message
@@ -66,4 +68,11 @@ struct SpeedMessage : Message
 
 const short speedMessageSize = sizeof(SpeedMessage);
 
+struct ContinueMessage : Message
+{
+    bool shouldContinue;
+    ContinueMessage() : Message(CONTINUE_KIND) {}
+};
+
+const short continueMessageSize = sizeof(ContinueMessage);
 #endif

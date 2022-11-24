@@ -4,11 +4,11 @@
 #include "GpioMap.h"
 
 unsigned long nextTick = 0;
+bool measuring = false;
 
 SerialConnection *conn = NULL;
 DualSerial* dStream = new DualSerial();
 
-void onLensChange(LensMessage);
 void onStatusChange(ConnectionState);
 
 void setup()
@@ -16,13 +16,21 @@ void setup()
   Serial.begin(115200);
   Serial1.begin(115200);
   conn = new SerialConnection(true, dStream);
-  conn->onMessage(&onLensChange);
   conn->onMessage(&onStatusChange);
+  nextTick = millis();
 }
 
 void loop()
 {
   conn->tick();
+  if(nextTick + 500 < millis()){
+    ContinueMessage msg;
+    msg.shouldContinue = measuring;
+    measuring = !measuring;
+    nextTick = millis();
+    Serial.print(msg.shouldContinue ? "yes" : "no");
+    conn->send(msg);
+  }
 }
 
 
@@ -49,20 +57,4 @@ void onStatusChange(ConnectionState s){
       msg = "Incoming";
   }
   Serial.println(msg);
-}
-
-void onLensChange(LensMessage lnsm)
-{
-  SpeedMessage spm;
-  const short frontDistance = lnsm.frontD;
-  const short backDistance = lnsm.backD;
-  short newSpeed = 0;
-  newSpeed = speedCalc(frontDistance);
-  
-  Serial.print("Lens recevied ");
-  Serial.print(frontDistance);
-  Serial.print(' ');
-  Serial.println(backDistance);
-  Serial.print("Speeds Send ");
-  Serial.println(newSpeed);
 }

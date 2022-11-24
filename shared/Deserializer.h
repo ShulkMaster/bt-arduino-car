@@ -29,3 +29,7 @@ void deserialize(SpeedMessage &m, byte *buff) {
     m.speedLeft = fromBigEndian(1, buff);
     m.speedRight = fromBigEndian(3, buff);
 }
+
+void deserialize(ContinueMessage &m, byte *buff) {
+    m.shouldContinue = buff[1];
+}

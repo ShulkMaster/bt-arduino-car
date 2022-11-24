@@ -7,6 +7,7 @@ Lens *lens = NULL;
 SerialConnection *conn = NULL;
 unsigned long tracked = 0;
 bool forward = true;
+SpeedMessage speedy;
 
 void setup()
 {
@@ -18,10 +19,13 @@ void setup()
   lens->registerCallback(&onMeasure);
   conn = new SerialConnection(false, &Serial);
   conn->onMessage(&onStatusChange);
+  conn->onMessage(&onContinueChange);
   pinMode(10, OUTPUT);
   pinMode(11, OUTPUT);
   digitalWrite(10, HIGH);
   digitalWrite(11, LOW);
+  speedy.speedLeft = 0;
+  speedy.speedRight = 0;
 }
 
 bool alternator = false;
@@ -47,11 +51,18 @@ void onMeasure(short front, short back)
   {
     newSpeed = -newSpeed;
   }
+  
+  speedy.speedLeft = newSpeed;
+  speedy.speedRight = newSpeed;
+  transmission->move(speedy);
+}
 
-  SpeedMessage spm;
-  spm.speedLeft = newSpeed;
-  spm.speedRight = newSpeed;
-  transmission->move(spm);
+void onContinueChange(ContinueMessage msg){
+  if(msg.shouldContinue){
+    transmission->move(speedy);
+  }else {
+    transmission->stop();
+  }
 }
 
 void onStatusChange(ConnectionState s)
@@ -79,7 +90,7 @@ void onStatusChange(ConnectionState s)
 
 void loop()
 {
-  if (conn->getState() == Connected || conn->getState() == Incomming)
+  if (conn->available())
   {
     lens->tick();
   }

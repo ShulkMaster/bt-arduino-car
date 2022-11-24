@@ -43,3 +43,11 @@ byte* serialize(LensMessage &m, int &size) {
     toBigEndian(m.backD, 3, data);
     return data;
 }
+
+byte* serialize(ContinueMessage &m, int &size) {
+    size = continueMessageSize;
+    byte* data = new byte[size];
+    data[0] = m.Kind;
+    data[1] = m.shouldContinue;
+    return data;
+}
