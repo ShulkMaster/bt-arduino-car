@@ -2,13 +2,14 @@
 #include "lib/SerialConnection.h"
 #include "DualSerial.h"
 #include "WifiManage.h"
-#include "GpioMap.h"
+#include "OnBoardSensor.h"
 
 unsigned long nextTick = 0;
 bool measuring = false;
 WifiManager manager;
 SerialConnection *conn = NULL;
 DualSerial *dStream = new DualSerial();
+OnBoardSensor sensors = OnBoardSensor();
 
 void onStatusChange(ConnectionState);
 
@@ -26,6 +27,7 @@ void loop()
 {
   conn->tick();
   manager.tick();
+  sensors.tick();
   if (nextTick + 3000 < millis())
   {
     ContinueMessage msg;
