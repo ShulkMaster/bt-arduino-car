@@ -9,7 +9,7 @@
 
 #define AIO_SERVER "io.adafruit.com"
 #define AIO_USERNAME "ShulkMaster"
-#define AIO_KEY "aio_pmhr59GnLciIwekyUwZQBTd5h911"
+#define AIO_KEY ""
 
 enum WifiManagerStatus
 {
@@ -27,9 +27,9 @@ class WifiManager
   Adafruit_MQTT_Publish *lightFeed;
   Adafruit_MQTT_Publish *humidityFeed;
   Adafruit_MQTT_Publish *temperatureFeed;
-  Adafruit_MQTT_Publish *tickFeed;
   unsigned long track = 0;
   int ret = -1;
+  PublishData sensorData;
 
 public:
   WifiManager()
@@ -38,7 +38,6 @@ public:
     this->lightFeed = new Adafruit_MQTT_Publish(mqttConn, AIO_USERNAME "/feeds/car-explorer.light-level");
     this->humidityFeed = new Adafruit_MQTT_Publish(mqttConn, AIO_USERNAME "/feeds/car-explorer.humidity");
     this->temperatureFeed = new Adafruit_MQTT_Publish(mqttConn, AIO_USERNAME "/feeds/car-explorer.temperature");
-    this->tickFeed = new Adafruit_MQTT_Publish(mqttConn, AIO_USERNAME "/feeds/car-explorer.tick");
     this->track = millis();
   }
 
@@ -107,19 +106,24 @@ public:
 
   void handleSending()
   {
-    if (track + 5000 > millis())
+    if (track + 8000 > millis())
       return;
     track = millis();
     state = MQQTReady;
-    float lightFake = millis() / 5000;
-    lightFake = 50 * sin(lightFake) + 50;
-    lightFeed->publish(lightFake);
+    bool sended = prepublish();
+    if(sended) {
+      Serial.println("Data sent");
+    } else Serial.println("Data failed");
   }
 
-  void prepublish(const PublishData &data) {
-    lightFeed->publish(data.lightLevel);
-    humidityFeed->publish(data.humidity);
-    temperatureFeed->publish(data.temperature);
-    tickFeed->publish(data.tick);
+  bool prepublish() {
+    bool success = lightFeed->publish(sensorData.lightLevel);
+    success = success && humidityFeed->publish(sensorData.humidity);
+    success = success && temperatureFeed->publish(sensorData.temperature);
+    return success;
   }
+
+  void setData(PublishData newData) {
+   sensorData = newData;
+   }
 };

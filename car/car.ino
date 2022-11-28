@@ -1,6 +1,9 @@
+#define LDRPin A0
+
 #include "Transmission.h"
 #include "Lens.h"
 #include "lib/SerialConnection.h"
+
 
 Transmission *transmission = NULL;
 Lens *lens = NULL;
@@ -9,6 +12,8 @@ unsigned long tracked = 0;
 bool forward = true;
 bool stopped = false;
 SpeedMessage speedy;
+int statusLdr;
+int ticks = 0;
 
 void setup()
 {
@@ -23,6 +28,7 @@ void setup()
   conn->onMessage(&onContinueChange);
   pinMode(10, OUTPUT);
   pinMode(11, OUTPUT);
+  pinMode(LDRPin, INPUT);
   digitalWrite(10, HIGH);
   digitalWrite(11, LOW);
   speedy.speedLeft = 0;
@@ -51,9 +57,18 @@ void onMeasure(short front, short back)
   if (!forward)
   {
     newSpeed = -newSpeed;
-  }
+    ticks--;
+  }else{
+    ticks++;
+    }
   speedy.speedLeft = newSpeed;
   speedy.speedRight = newSpeed;
+  SensorMessage msg;
+  msg.tick = ticks;
+  msg.lightLevel = statusLdr;
+  transmission->stop();
+  conn->send(msg);
+  Serial.print('W');
   if(stopped) return;
   transmission->move(speedy);
 }
@@ -61,13 +76,8 @@ void onMeasure(short front, short back)
 void onContinueChange(ContinueMessage msg){
   stopped = msg.shouldContinue;
   if(msg.shouldContinue){
-    Serial.print("y");
-    Serial.print(speedy.speedLeft);
-    Serial.print(' ');
-    Serial.println(speedy.speedRight);
     transmission->move(speedy);
   }else {
-    Serial.print("n");
     transmission->stop();
   }
 }
@@ -101,6 +111,7 @@ void loop()
   {
     lens->tick();
   }
+  statusLdr = analogRead(LDRPin);
   conn->tick();
   if (millis() - conn->lastReceived() > ConnectionWaitTimeout && tracked + 500 < millis())
   {

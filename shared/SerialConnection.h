@@ -21,6 +21,7 @@ typedef void (*LensMsgCallback)(LensMessage msg);
 typedef void (*StatusCallback)(ConnectionState msg);
 typedef void (*SpeedCallback)(SpeedMessage msg);
 typedef void (*ContinueCallback)(ContinueMessage msg);
+typedef void (*SensorCallback)(SensorMessage msg);
 
 class SerialConnection
 {
@@ -32,6 +33,7 @@ private:
   SpeedCallback speedCb = NULL;
   StatusCallback statusCb = NULL;
   ContinueCallback continueCb = NULL;
+  SensorCallback sensorCb = NULL;
   unsigned long track = 0;
   unsigned long lastIncomingMsg = 0;
 
@@ -95,6 +97,11 @@ public:
     lensCb = cb;
   }
 
+  void onMessage(SensorCallback cb)
+  {
+    sensorCb = cb;
+  }
+
   void onMessage(SpeedCallback cb)
   {
     speedCb = cb;
@@ -110,7 +117,8 @@ public:
     continueCb = cb;
   }
 
-  bool available() {
+  bool available()
+  {
     return state == Connected || state == Incomming;
   }
 
@@ -152,7 +160,6 @@ private:
       byte buff[challengeMessageSize] = {0};
       m_serial->readBytes(buff, challengeMessageSize);
       deserialize(m, buff);
-
       if (m.letter == LETTER_OK)
       {
         setState(Connected);
@@ -220,6 +227,21 @@ private:
     byte *buff = NULL;
     switch (m_serial->peek())
     {
+    case SENSOR_KIND:
+      Serial.print("SENSOR ARRIVED");
+      if (m_serial->available() >= sensorMessageSize)
+      {
+        SensorMessage m;
+        buff = new byte[sensorMessageSize];
+        m_serial->readBytes(buff, sensorMessageSize);
+        deserialize(m, buff);
+        sensorCb(m);
+        Serial.print(m.lightLevel);
+        Serial.print('|');
+        Serial.println(m.tick);
+        setState(Connected);
+      }
+      break;
     case LENS_KIND:
       if (m_serial->available() >= lensMessageSize)
       {

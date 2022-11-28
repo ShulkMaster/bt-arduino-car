@@ -4,23 +4,16 @@
 
 class OnBoardSensor {
 DHT dht = DHT(D5, DHT11);
-unsigned long track = 0;
-    public:
+ public:
+float h;
+float t;
+
 OnBoardSensor(){
   dht.begin();
-  track = millis();
 }
     
-
     void tick(){
-      if(track + 2000 > millis()) return;
-      float h = dht.readHumidity();
-  // Read temperature as Celsius
-  float t = dht.readTemperature();
-  //publish temperature and humidity
-  Serial.print(F("\nTemperature: "));
-  Serial.print(t);
-  Serial.print(F("\nHumidity: "));
-  Serial.print(h);
+      h = dht.readHumidity();
+      t = dht.readTemperature();
     }
 };

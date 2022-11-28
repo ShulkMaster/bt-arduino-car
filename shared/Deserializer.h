@@ -33,3 +33,8 @@ void deserialize(SpeedMessage &m, byte *buff) {
 void deserialize(ContinueMessage &m, byte *buff) {
     m.shouldContinue = buff[1];
 }
+
+void deserialize(SensorMessage &m, byte *buff){
+    m.lightLevel = fromBigEndian(1, buff);
+    m.tick = fromBigEndian(3, buff);
+}

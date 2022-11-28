@@ -10,8 +10,10 @@ WifiManager manager;
 SerialConnection *conn = NULL;
 DualSerial *dStream = new DualSerial();
 OnBoardSensor sensors = OnBoardSensor();
+PublishData publishData;
 
 void onStatusChange(ConnectionState);
+void onSensorMessage(SensorMessage);
 
 void setup()
 {
@@ -19,6 +21,7 @@ void setup()
   Serial1.begin(115200);
   conn = new SerialConnection(true, dStream);
   conn->onMessage(&onStatusChange);
+  conn->onMessage(&onSensorMessage);
   nextTick = millis();
   manager.begin();
 }
@@ -28,6 +31,9 @@ void loop()
   conn->tick();
   manager.tick();
   sensors.tick();
+  publishData.humidity = sensors.h;
+  publishData.temperature = sensors.t;
+  manager.setData(publishData);
   if (nextTick + 3000 < millis())
   {
     ContinueMessage msg;
@@ -37,6 +43,15 @@ void loop()
     Serial.print(msg.shouldContinue ? "yes" : "no");
     conn->send(msg);
   }
+}
+
+void onSensorMessage(SensorMessage m){
+  Serial.println();
+  Serial.print(m.lightLevel);
+  Serial.print('|');
+  Serial.println(m.tick);
+  publishData.lightLevel = m.lightLevel;
+  publishData.tick = m.tick;
 }
 
 void onStatusChange(ConnectionState s)

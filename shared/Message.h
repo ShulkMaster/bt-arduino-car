@@ -7,6 +7,7 @@
 #define CHALLENGE_RESPONSE_KIND 'Z'
 #define SPEED_KIND 'S'
 #define CONTINUE_KIND 'Q'
+#define SENSOR_KIND 'M'
 
 bool isMessageKind(byte b)
 {
@@ -75,4 +76,14 @@ struct ContinueMessage : Message
 };
 
 const short continueMessageSize = sizeof(ContinueMessage);
+
+struct SensorMessage : Message
+{
+    short tick = 0;
+    short lightLevel = 0;
+    SensorMessage() : Message(SENSOR_KIND) {}
+};
+
+const short sensorMessageSize = sizeof(SensorMessage);
+
 #endif
