@@ -228,7 +228,6 @@ private:
     switch (m_serial->peek())
     {
     case SENSOR_KIND:
-      Serial.print("SENSOR ARRIVED");
       if (m_serial->available() >= sensorMessageSize)
       {
         SensorMessage m;

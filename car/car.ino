@@ -13,7 +13,7 @@ bool forward = true;
 bool stopped = false;
 SpeedMessage speedy;
 int statusLdr;
-int ticks = 0;
+unsigned long tickw = 0;
 
 void setup()
 {
@@ -33,6 +33,7 @@ void setup()
   digitalWrite(11, LOW);
   speedy.speedLeft = 0;
   speedy.speedRight = 0;
+  tickw = millis();
 }
 
 bool alternator = false;
@@ -57,18 +58,19 @@ void onMeasure(short front, short back)
   if (!forward)
   {
     newSpeed = -newSpeed;
-    ticks--;
   }else{
-    ticks++;
     }
   speedy.speedLeft = newSpeed;
   speedy.speedRight = newSpeed;
-  SensorMessage msg;
-  msg.tick = ticks;
-  msg.lightLevel = statusLdr;
+  
   transmission->stop();
-  conn->send(msg);
-  Serial.print('W');
+  if(tickw + 350 <= millis()){
+    SpeedMessage msg;
+    msg.speedLeft = statusLdr;
+    Serial.println(statusLdr);
+    conn->send(msg);
+    tickw = millis();
+  }
   if(stopped) return;
   transmission->move(speedy);
 }

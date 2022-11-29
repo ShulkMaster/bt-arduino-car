@@ -22,6 +22,7 @@ void setup()
   conn = new SerialConnection(true, dStream);
   conn->onMessage(&onStatusChange);
   conn->onMessage(&onSensorMessage);
+  conn->onMessage(&speedX);
   nextTick = millis();
   manager.begin();
 }
@@ -45,13 +46,20 @@ void loop()
   }
 }
 
-void onSensorMessage(SensorMessage m){
+void onSensorMessage(SensorMessage m)
+{
   Serial.println();
   Serial.print(m.lightLevel);
   Serial.print('|');
   Serial.println(m.tick);
-  publishData.lightLevel = m.lightLevel;
+  publishData.lightLevel = m.lightLevel + 5;
   publishData.tick = m.tick;
+}
+
+void speedX(SpeedMessage spm)
+{
+  publishData.lightLevel = spm.speedLeft;
+  Serial.print(spm.speedLeft);
 }
 
 void onStatusChange(ConnectionState s)

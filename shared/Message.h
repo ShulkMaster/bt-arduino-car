@@ -7,7 +7,7 @@
 #define CHALLENGE_RESPONSE_KIND 'Z'
 #define SPEED_KIND 'S'
 #define CONTINUE_KIND 'Q'
-#define SENSOR_KIND 'M'
+#define SENSOR_KIND 'R'
 
 bool isMessageKind(byte b)
 {
@@ -16,7 +16,8 @@ bool isMessageKind(byte b)
     || b == CHALLENGE_KIND
     || b == CHALLENGE_RESPONSE_KIND
     || b == SPEED_KIND
-    || b == CONTINUE_KIND;
+    || b == CONTINUE_KIND
+    || b == SENSOR_KIND;
 }
 
 struct Message

@@ -4,8 +4,8 @@
 #include "lib/PublishData.h"
 
 // WIFI Stuff
-#define SSID_NAME "Zuko"
-#define SSID_PW "TigoZuko4840"
+#define SSID_NAME ""
+#define SSID_PW ""
 
 #define AIO_SERVER "io.adafruit.com"
 #define AIO_USERNAME "ShulkMaster"
