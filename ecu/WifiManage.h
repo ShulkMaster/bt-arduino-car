@@ -46,6 +46,8 @@ public:
     Serial.println("Connecting to WiFi");
     WiFi.mode(WIFI_STA);
     WiFi.begin(SSID_NAME, SSID_PW);
+    WiFi.setAutoReconnect(true);
+    WiFi.persistent(true);
   }
 
   void tick()
@@ -82,7 +84,7 @@ public:
 
   void handleConneced()
   {
-    if (track + 2000 > millis())
+    if (track + 1200 > millis())
       return;
     track = millis();
     if (mqttConn->connected())
@@ -106,14 +108,17 @@ public:
 
   void handleSending()
   {
-    if (track + 8000 > millis())
+    if (track + 6000 > millis())
       return;
     track = millis();
-    state = MQQTReady;
     bool sended = prepublish();
     if(sended) {
       Serial.println("Data sent");
-    } else Serial.println("Data failed");
+      state = MQQTReady;
+    } else {
+      Serial.println("Data failed");
+      state = WConnected;
+    }
   }
 
   bool prepublish() {
